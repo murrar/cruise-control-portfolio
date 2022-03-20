@@ -1,0 +1,146 @@
+{% extends 'main/header.html' %}
+
+{% block content %}
+    <div class="container">
+      <div class="row center flow-text">
+        <p>cruise control portfolio</p>
+      </div>
+      <div class="row center flow-text" id="time">
+        <div class="progress">
+          <div class="indeterminate"></div>
+        </div>
+      </div>
+      <div class="row center flow-text" id="return">
+        <div class="preloader-wrapper small active">
+          <div class="spinner-layer spinner-green-only">
+            <div class="circle-clipper left">
+              <div class="circle"></div>
+            </div><div class="gap-patch">
+              <div class="circle"></div>
+            </div><div class="circle-clipper right">
+              <div class="circle"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="container">
+      <div class="row center flow-text">
+        <p>ccp weights before market close:</p>
+      </div>
+      <div class="row center">
+        <div class="col s6">
+          <div style="font-size:3rem" id="talk">
+            <div class="preloader-wrapper small active">
+              <div class="spinner-layer spinner-green-only">
+                <div class="circle-clipper left">
+                  <div class="circle"></div>
+                </div><div class="gap-patch">
+                  <div class="circle"></div>
+                </div><div class="circle-clipper right">
+                  <div class="circle"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col s6">
+          <div style="font-size:3rem" id="reco">
+            <div class="preloader-wrapper small active">
+              <div class="spinner-layer spinner-green-only">
+                <div class="circle-clipper left">
+                  <div class="circle"></div>
+                </div><div class="gap-patch">
+                  <div class="circle"></div>
+                </div><div class="circle-clipper right">
+                  <div class="circle"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="flow-text">
+        <p>This is a daily updating portfolio management tool derived from
+          Andrew W. Lo's <i>Adaptive Markets Hypothesis</i>. This website was
+          developed using the <em>django</em> framework.
+        </p>
+      </div>
+      <div style="font-size:1.5rem">
+        <p>
+          <u><b>Disclaimer</b></u><br><em> The information on this website is for general information
+          only.</em> It should not be taken as constituting professional
+          advice from the website owner. ccp is not a financial adviser. You
+          should consider seeking independent legal, financial, taxation or
+          other advice to check how the website information relates to your
+          unique circumstances. ccp is not liable for any loss caused, whether
+          due to negligence or otherwise arising from the use of, or reliance
+          on, the information provided directly or indirectly, by use of this
+          website.
+        </p>
+      </div>
+    </div>
+    <div class="container">
+        <div class="row  flow-text">
+          <div class="col s12">
+            <p>contact</p>
+            <p>ryanmurray559@gmail.com</p>
+          </div>
+          <div>
+            <ul>
+              <li>
+                <a class="grey-text" href="https://www.linkedin.com/in/ryan-murr/" target="_blank" rel="noopener noreferrer">
+                 <i class="fa fa-linkedin-square medium"></i>
+                </a>
+              </li>
+            </ul>
+          </div>
+        </div>
+    </div>
+    <script>
+      (function tiingo() {
+        fetch('https://frozen-caverns-76586.herokuapp.com/https://api.tiingo.com/iex/?tickers=spy&token=2275a827410dd3dd64a3ba53e96ab66e77436939', {
+          headers: {
+            'Content-Type': 'application/json'
+            },
+          })
+          .then(function(response) { return response.json() })
+          .then(function(data) {
+                  obj = JSON.parse(JSON.stringify(data).substring(1, JSON.stringify(data).length-1));
+                  var r = Math.log(obj.last/obj.prevClose);
+                      mthAVG = {{Average_20D}}*20/21+r/21;
+                      mthVAR = {{Volatility_20D}}*20/21;
+                      mth = Math.sqrt({{Volatility_target}}/(20/21*({{Average_20D}}-mthAVG)**2+1/21*(r-mthAVG)**2+mthVAR));
+                  document.getElementById("return").innerHTML = (r*100).toFixed(6)+"% today";
+                  document.getElementById("talk").innerHTML = ((1-Math.abs(mth-1)/2)*100).toFixed(0)+"% S&P500";
+                  if (mth > 1) {
+                    document.getElementById("reco").innerHTML = ((1-(1-Math.abs(mth-1)/2))*100).toFixed(0)+"% 3x Leverage S&P500";
+                  } else {
+                    document.getElementById("reco").innerHTML = ((1-mth)/2*100).toFixed(0)+"% Cash";
+                  }
+                  if (r > 0) {
+                    document.getElementById("return").style='color:green';
+                  } else {
+                    document.getElementById("return").style='color:red';
+                  }
+                });
+            setTimeout(tiingo, 7500);
+      })();
+
+      (function myTimer() {
+        const options = {
+          year: '2-digit', month: '2-digit', day: '2-digit',
+          hour: '2-digit', minute: '2-digit', second: '2-digit',
+          timeZone: 'America/New_York',
+          timeZoneName: 'short'
+        }
+        const formatter = new Intl.DateTimeFormat('en-US', options)
+        const startingDate = new Date()
+
+        const dateInNewTimezone = formatter.format(startingDate)
+        document.getElementById("time").innerHTML = dateInNewTimezone;
+        setTimeout(myTimer, 1000);
+      })();
+    </script>
+{% endblock %}
+
